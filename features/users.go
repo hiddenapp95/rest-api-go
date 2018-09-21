@@ -3,7 +3,7 @@ package features
 import (
 	"context"
 	"encoding/json"
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/jinzhu/gorm"
@@ -14,70 +14,72 @@ import (
 	"strings"
 )
 
-type User struct {
-	gorm.Model
-	Email string `json:"email"`
-	Password string `json:"password"`
-	Role string `json:"role"`
-	Token string `json:"token";sql:"-"`
-}
-
-type Token struct {
-	UserId uint
-	jwt.StandardClaims
-}
-
 func UserRoutes() *chi.Mux {
 	router := chi.NewRouter()
-	router.Post("/", Create)
+	router.Post("/create", Create)
+	router.Post("/login", Login)
 	return router
 }
 
+type User struct {
+	gorm.Model
+	Email string `json:"email" binding:"required"`
+	Password string `json:"password,omitempty" binding:"required"`
+	Role string `json:"role,omitempty"`
+}
+
+type Token struct {
+	UserId uint `json:"userId,omitempty" binding:"required"`
+	Email string `json:"email,omitempty" binding:"required"`
+	Role string `json:"role,omitempty" binding:"required"`
+	Token string `json:"token,omitempty" binding:"required"`
+	jwt.StandardClaims
+}
+
+var userErrors = map[string]int{
+	"InvalidParams": 0,
+	"DbError": 1,
+	"MailAlreadyInUse": 2,
+	"ErrorNotFound": 3,
+	"UserNotFound": 4,
+	"InvalidPassword": 5,
+	"InvalidToken": 6,
+}
 
 func Create(w http.ResponseWriter, r *http.Request)  {
-
 	user := &User{}
 	err := json.NewDecoder(r.Body).Decode(user) //decode the request body into struct and failed if any error occur
 	if err != nil {
-		render.JSON(w, r, utils.BuildResponse("Invalid request"))
+		renderResponse(w, r,buildErrorResponse(userErrors["InvalidParams"]),http.StatusBadRequest)
 		return
 	}
-
 	tempUser := &User{}
-
 	err = GetDB().Table("users").Where("email = ?", user.Email).First(tempUser).Error
-
 	if  err != nil && err != gorm.ErrRecordNotFound {
-		render.JSON(w, r, utils.BuildResponse("Invalid request"))
+		renderResponse(w, r,buildErrorResponse(userErrors["DbError"]),http.StatusBadRequest)
 		return
 	}
-
 	if err != gorm.ErrRecordNotFound{
-		render.JSON(w, r, utils.BuildResponse("Mail already in use"))
+		renderResponse(w, r,buildErrorResponse(userErrors["MailAlreadyInUse"]),http.StatusBadRequest)
 		return
 	}
-
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	user.Password = string(hashedPassword)
-
-	GetDB().Create(user)
-
-	if user.ID <= 0 {
-		render.JSON(w, r, utils.BuildResponse( "Failed to create account, connection error."))
+	err = GetDB().Create(user).Error
+	if user.ID <= 0 || err!= nil {
+		renderResponse(w, r,buildErrorResponse(userErrors["DbError"]),http.StatusBadRequest)
 		return
 	}
-
-	render.JSON(w, r, utils.BuildResponse("CreatedUser"))
+	render.JSON(w, r, "Created user")
 	return
 }
-
 
 func Login(w http.ResponseWriter, r *http.Request) {
 
 	user := &User{}
 	err := json.NewDecoder(r.Body).Decode(user) //decode the request body into struct and failed if any error occur
 	if err != nil {
-		render.JSON(w, r, utils.BuildResponse("Invalid request"))
+		renderResponse(w, r,buildErrorResponse(userErrors["InvalidParams"]),http.StatusBadRequest)
 		return
 	}
 
@@ -88,16 +90,16 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			render.JSON(w, r, utils.BuildResponse("Email address not found"))
+			renderResponse(w, r,buildErrorResponse(userErrors["UserNotFound"]),http.StatusBadRequest)
 			return
 		}
-		render.JSON(w, r, utils.BuildResponse("Email address not found"))
+		renderResponse(w, r,buildErrorResponse(userErrors["DbError"]),http.StatusBadRequest)
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil || err == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!
-		render.JSON(w, r, utils.BuildResponse("Invalid login credentials. Please try again"))
+		renderResponse(w, r,buildErrorResponse(userErrors["InvalidPassword"]),http.StatusUnauthorized)
 		return
 	}
 
@@ -105,14 +107,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	user.Password = ""
 
 	//Create JWT token
-	tk := &Token{UserId: user.ID}
+	tk := &Token{UserId: user.ID,Email: user.Email, Role: user.Role}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
 	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
-	user.Token = tokenString //Store the token in the response
+	tk.Token = tokenString //Store the token in the response
 
-	resp := utils.BuildResponse("OK")
-	resp["user"] = user
-	render.JSON(w, r,resp)
+	renderResponse(w, r,tk,http.StatusOK)
 	return
 }
 
@@ -120,7 +120,13 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		notAuth := []string{"/api/users/new","/api/users/","/api/users", "/api/users/login"} //List of endpoints that doesn't require users
+		notAuth := []string{
+			"/api/users/create",
+			"/api/users/create/",
+			"/api/products/",
+			"/api/products",
+			"/api/users/login",
+			"/api/users/login/"} //List of endpoints that doesn't require users
 		requestPath := r.URL.Path //current request path
 
 		if utils.InArray(requestPath,notAuth) {
@@ -128,14 +134,10 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 			return
 		}
 
-		response := make(map[string]string)
 		tokenHeader := r.Header.Get("Authorization") //Grab the token from the header
 
 		if tokenHeader == "" || len(strings.Split(tokenHeader, " "))!=2 { //Token is missing, returns with error code 403 Unauthorized
-			response["message"] = "Invalid token"
-			w.WriteHeader(http.StatusForbidden)
-			w.Header().Add("Content-Type", "application/json")
-			render.JSON(w, r, response)
+			renderResponse(w, r,buildErrorResponse(userErrors["InvalidToken"]),http.StatusForbidden)
 			return
 		}
 
@@ -148,10 +150,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 		})
 
 		if err != nil || !token.Valid { //Malformed token, returns with http code 403 as usual
-			response["message"] = "Invalid token"
-			w.WriteHeader(http.StatusForbidden)
-			w.Header().Add("Content-Type", "application/json")
-			render.JSON(w, r, response)
+			renderResponse(w, r,buildErrorResponse(userErrors["InvalidToken"]),http.StatusForbidden)
 			return
 		}
 

@@ -22,7 +22,7 @@ func Routes() *chi.Mux {
 	router.Use(JwtAuthentication) //attach JWT users middleware
 
 	router.Route("/api", func(r chi.Router) {
-		r.Mount("/todo", TodoRoutes())
+		r.Mount("/products", ProductRoutes())
 		r.Mount("/users", UserRoutes())
 	})
 
@@ -30,19 +30,6 @@ func Routes() *chi.Mux {
 }
 
 func main() {
-
 	router := Routes()
-
-	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
-		log.Printf("%s %s\n", method, route) // Walk and print out all routes
-		return nil
-	}
-
-	err := chi.Walk(router, walkFunc)
-
-	if err != nil {
-		log.Panicf("Logging err: %s\n", err.Error()) // panic if there is an error
-	}
-
 	log.Fatal(http.ListenAndServe(":8081", router)) // Note, the port is usually gotten from the environment.
 }

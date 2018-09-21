@@ -1,54 +1,72 @@
 package features
 
 import (
+	"encoding/json"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/render"
-	utils "rest-api/utils"
+	"github.com/jinzhu/gorm"
 	"net/http"
 )
 
-type Todo struct {
-	Slug  string `json:"slug"`
-	Title string `json:"title"`
-	Body  string `json:"body"`
+type Product struct {
+	gorm.Model
+	Name string `json:"name"`
+	Price string `json:"price"`
+	Status  bool `json:"status"`
 }
 
-func TodoRoutes() *chi.Mux {
+func ProductRoutes() *chi.Mux {
 	router := chi.NewRouter()
-	router.Get("/{todoID}", GetATodo)
-	router.Delete("/{todoID}", DeleteTodo)
-	router.Post("/", CreateTodo)
-	router.Get("/", GetAllTodos)
+	router.Get("/", GetProducts)
+	router.Post("/", CreateProduct)
+	router.Put("/",UpdateProduct)
 	return router
 }
 
-func GetATodo(w http.ResponseWriter, r *http.Request) {
-	todoID := chi.URLParam(r, "todoID")
-	todos := Todo{
-		Slug:  todoID,
-		Title: "Hello world",
-		Body:  "Heloo world from planet earth",
+var productErrors = map[string]int{
+	"InvalidParams": 1,
+	"DbError": 2,
+}
+
+func GetProducts(w http.ResponseWriter, r *http.Request) {
+	//todoID := chi.URLParam(r, "todoID")
+	products := make([]*Product, 0)
+	err := GetDB().Table("products").Find(&products).Error
+	if err!=nil {
+		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
+		return
 	}
-	render.JSON(w, r, todos) // A chi router helper for serializing and returning json
+	renderResponse(w, r,products,http.StatusOK)
 }
 
-func DeleteTodo(w http.ResponseWriter, r *http.Request) {
-	render.JSON(w, r, utils.BuildResponse("Deleted TODO successfully")) // Return some demo response
-}
+func UpdateProduct(w http.ResponseWriter, r *http.Request) {
+	product := &Product{}
 
-func CreateTodo(w http.ResponseWriter, r *http.Request) {
-	response := make(map[string]string)
-	response["message"] = "Created TODO successfully"
-	render.JSON(w, r, response) // Return some demo response
-}
-
-func GetAllTodos(w http.ResponseWriter, r *http.Request) {
-	todos := []Todo{
-		{
-			Slug:  "slug",
-			Title: "Hello world",
-			Body:  "Heloo world from planet earth",
-		},
+	err := json.NewDecoder(r.Body).Decode(product) //decode the request body into struct and failed if any error occur
+	if err!=nil {
+		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
+		return
 	}
-	render.JSON(w, r, todos) // A chi router helper for serializing and returning json
+
+	err = db.Model(&product).Where("id = ?", product.ID).Updates(product).Error
+	if err!=nil {
+		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
+		return
+	}
+
+	product.Status = !product.Status
+
+	renderResponse(w, r,product,http.StatusOK)
+}
+
+func CreateProduct(w http.ResponseWriter, r *http.Request) {
+	product := &Product{}
+
+	err := json.NewDecoder(r.Body).Decode(product) //decode the request body into struct and failed if any error occur
+
+	if err!=nil{
+		renderResponse(w, r,buildErrorResponse(userErrors["InvalidParams"]),http.StatusBadRequest)
+		return
+	}
+
+	renderResponse(w, r,product,http.StatusOK)
 }
