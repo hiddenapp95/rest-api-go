@@ -1,7 +1,6 @@
 package features
 
 import (
-	"context"
 	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
@@ -10,8 +9,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"os"
-	"rest-api/utils"
-	"strings"
 )
 
 func UserRoutes() *chi.Mux {
@@ -98,65 +95,20 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	if err != nil || err == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!
+
+	if err != nil || err == bcrypt.ErrMismatchedHashAndPassword {
 		renderResponse(w, r,buildErrorResponse(userErrors["InvalidPassword"]),http.StatusUnauthorized)
 		return
 	}
 
-	//Worked! Logged In
 	user.Password = ""
 
-	//Create JWT token
 	tk := &Token{UserId: user.ID,Email: user.Email, Role: user.Role}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
 	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
-	tk.Token = tokenString //Store the token in the response
+	tk.Token = tokenString
 
 	renderResponse(w, r,tk,http.StatusOK)
 	return
 }
 
-var JwtAuthentication = func(next http.Handler) http.Handler {
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		notAuth := []string{
-			"/api/users/create",
-			"/api/users/create/",
-			"/api/products/",
-			"/api/products",
-			"/api/users/login",
-			"/api/users/login/"} //List of endpoints that doesn't require users
-		requestPath := r.URL.Path //current request path
-
-		if utils.InArray(requestPath,notAuth) {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		tokenHeader := r.Header.Get("Authorization") //Grab the token from the header
-
-		if tokenHeader == "" || len(strings.Split(tokenHeader, " "))!=2 { //Token is missing, returns with error code 403 Unauthorized
-			renderResponse(w, r,buildErrorResponse(userErrors["InvalidToken"]),http.StatusForbidden)
-			return
-		}
-
-		tokenPart := strings.Split(tokenHeader, " ")[1] //Grab the token part, what we are truly interested in
-
-		tokenData := Token{}
-
-		token, err := jwt.ParseWithClaims(tokenPart, tokenData, func(token *jwt.Token) (interface{}, error) {
-			return []byte(os.Getenv("token_password")), nil
-		})
-
-		if err != nil || !token.Valid { //Malformed token, returns with http code 403 as usual
-			renderResponse(w, r,buildErrorResponse(userErrors["InvalidToken"]),http.StatusForbidden)
-			return
-		}
-
-		//Everything went well, proceed with the request and set the caller to the user retrieved from the parsed token
-		ctx := context.WithValue(r.Context(), "user", tokenData.UserId)
-		r = r.WithContext(ctx)
-		next.ServeHTTP(w, r) //proceed in the middleware chain!
-	})
-}

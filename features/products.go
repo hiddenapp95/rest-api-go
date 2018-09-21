@@ -11,11 +11,12 @@ type Product struct {
 	gorm.Model
 	Name string `json:"name"`
 	Price string `json:"price"`
-	Status  bool `json:"status"`
+	Enabled  bool `json:"enabled"`
 }
 
 func ProductRoutes() *chi.Mux {
 	router := chi.NewRouter()
+	router.Get("/{property}-{value}", GetProductRequests)
 	router.Get("/", GetProducts)
 	router.Post("/", CreateProduct)
 	router.Put("/",UpdateProduct)
@@ -28,9 +29,18 @@ var productErrors = map[string]int{
 }
 
 func GetProducts(w http.ResponseWriter, r *http.Request) {
-	//todoID := chi.URLParam(r, "todoID")
 	products := make([]*Product, 0)
-	err := GetDB().Table("products").Find(&products).Error
+	property := chi.URLParam(r,"property")
+	value := chi.URLParam(r,"value")
+
+	var err error
+
+	if property == "all"{
+		err = GetDB().Table("products").Find(&products).Error
+	}else{
+		err = GetDB().Table("products").Where(property+" ? = " +value).Find(&products).Error
+	}
+
 	if err!=nil {
 		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
 		return
@@ -46,14 +56,11 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
 		return
 	}
-
-	err = db.Model(&product).Where("id = ?", product.ID).Updates(product).Error
+	err = db.Save(&product).Where("id = ?", product.ID).Error
 	if err!=nil {
 		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
 		return
 	}
-
-	product.Status = !product.Status
 
 	renderResponse(w, r,product,http.StatusOK)
 }
@@ -65,6 +72,12 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 
 	if err!=nil{
 		renderResponse(w, r,buildErrorResponse(userErrors["InvalidParams"]),http.StatusBadRequest)
+		return
+	}
+
+	err = GetDB().Create(product).Error
+	if err!=nil{
+		renderResponse(w, r,buildErrorResponse(userErrors["DbError"]),http.StatusBadRequest)
 		return
 	}
 
