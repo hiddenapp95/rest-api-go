@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/jinzhu/gorm"
 	"net/http"
+	"strconv"
 )
 
 type ProductRequestInfo struct{
@@ -22,6 +23,7 @@ type ProductRequest struct {
 func ProductRequestsRoutes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Get("/{property}-{value}", GetProductRequests)
+	router.Get("/myRequests", GetUserProductRequests)
 	router.Post("/", CreateProductRequests)
 	router.Put("/",UpdateProductRequests)
 	return router
@@ -30,6 +32,18 @@ func ProductRequestsRoutes() *chi.Mux {
 var productRequestsErrors = map[string]int{
 	"InvalidParams": 1,
 	"DbError": 2,
+}
+
+func GetUserProductRequests(w http.ResponseWriter, r *http.Request) {
+	productRequests := make([]*ProductRequest, 0)
+	userId := r.Context().Value("userId") . (uint)
+	err := GetDB().Table("product_requests").Where("user_id = " + strconv.FormatUint(uint64(userId),10)).Find(&productRequests).Error
+
+	if err!=nil {
+		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
+		return
+	}
+	renderResponse(w, r,productRequests,http.StatusOK)
 }
 
 func GetProductRequests(w http.ResponseWriter, r *http.Request) {
@@ -83,8 +97,7 @@ func CreateProductRequests(w http.ResponseWriter, r *http.Request) {
 	
 	for _, element := range productRequestInfo {
 		productRequest := ProductRequest{}
-		//productRequest.UserId = r.Context().Value("userId"). (uint)
-		productRequest.UserId = 1
+		productRequest.UserId = r.Context().Value("userId"). (uint)
 		productRequest.ProductId = element.ProductId
 		productRequest.ProductQuantity = element.ProductQuantity
 

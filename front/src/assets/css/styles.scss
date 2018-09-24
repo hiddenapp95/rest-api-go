@@ -1,0 +1,164 @@
+$loader-background-color: rgba(15,15,150,0.5);
+$check-icon-color: #8BC34A ;
+$warning-icon-color: #FFA726;
+$warning-icon2-color: #FFA726;
+
+body{
+  margin: 0;
+
+  p,h1,h2,h4,h5,b{
+    color: white;
+  }
+}
+
+.warning-icon{
+  color: $warning-icon-color;
+}
+
+.check-icon{
+  color: $check-icon-color;
+}
+
+#login{
+  text-align: center;
+
+  .title{
+    padding: 15px 15px;
+  }
+  #customBtn {
+    display: inline-block;
+    background: white;
+    color: #444;
+    width: 190px;
+    border-radius: 5px;
+    border: thin solid #888;
+    box-shadow: 1px 1px 1px grey;
+    white-space: nowrap;
+  }
+  #customBtn:hover {
+    cursor: pointer;
+  }
+  span.label {
+    font-family: serif;
+    font-weight: normal;
+  }
+  span.icon {
+    background: url('/g-normal.png') transparent 5px 50% no-repeat;
+    display: inline-block;
+    vertical-align: middle;
+    width: 42px;
+    height: 42px;
+  }
+  span.buttonText {
+    display: inline-block;
+    vertical-align: middle;
+    padding-left: 42px;
+    padding-right: 42px;
+    font-size: 14px;
+    font-weight: bold;
+    /* Use the Roboto font that is loaded in the <head> */
+    font-family: 'Roboto', sans-serif;
+  }
+}
+
+#admin-users{
+  text-align: center;
+
+  #new-email{
+    text-align: center;
+    margin: 15px 0;
+  }
+
+}
+
+
+#loader-container{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background-color: $loader-background-color;
+
+  #loader-image{
+    margin-top: 150px;
+    animation: ld-bounce 2s infinite;
+  }
+  @keyframes ld-bounce {
+    0%, 90% {
+      animation-timing-function: linear;
+    }
+    10% {
+      animation-timing-function: cubic-bezier(0,.4,.6,1);
+      -webkit-transform: translate(0%,5%) scaleY(1.1);
+      transform: translate(0%,5%) scaleY(1.1);
+    }
+    50% {
+      animation-timing-function: cubic-bezier(.4,0,1,.6);
+      -webkit-transform: translate(0%,-37%) scaleY(1.1);
+      transform: translate(0%,-37%) scaleY(1.1);
+    }
+    0%, 100% {
+      -webkit-transform: translate(0%,30%) scaleY(.5);
+      transform: translate(0%,30%) scaleY(.5);
+    }
+    90% {
+      -webkit-transform: translate(0%,5%) scaleY(1.1);
+      transform: translate(0%,5%) scaleY(1.1);
+    }
+  }
+}
+
+
+#landing{
+  text-align: center;
+
+  #background{
+      position:absolute;
+      width:100%;
+      height: 90vh;
+      background: url("../images/si-logo.jpg");
+      background-position-y: center;
+      opacity:0.1;
+      -webkit-animation: right-to-left 15s linear infinite;
+      -moz-animation: right-to-left 15s linear infinite;
+      animation: right-to-left 15s linear infinite;
+  }
+  @keyframes right-to-left{
+    100% {
+      background-position-x: 291px;
+    }
+  }
+}
+
+#drawer-content{
+  text-align: center;
+  #drawer-logo{
+    width:150px;
+  }
+}
+
+#preview-image-container{
+  height: 200px;
+  width: 200px;
+  border: 1px dashed;
+  position: relative;
+  margin:auto;
+  top:50%;
+  transform:translateY(-50%);
+
+  &.error-image{
+    border-color: #f44336;;
+  }
+  .image{
+    max-height:100%;
+    max-width:100%;
+  }
+  .upload-icon{
+    position:absolute;
+    bottom:0;
+    cursor:pointer;
+    height:50px;
+    width:50px;
+  }
+}

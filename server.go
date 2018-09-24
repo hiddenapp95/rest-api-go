@@ -25,6 +25,7 @@ func Routes() *chi.Mux {
 		r.Mount("/products", ProductRoutes())
 		r.Mount("/users", UserRoutes())
 		r.Mount("/productRequest", ProductRequestsRoutes())
+		r.Mount("/gc",GoogleCloudStorageRoutes())
 	})
 
 	return router

@@ -20,7 +20,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 			"/api/users/login/"} //List of endpoints that doesn't require users
 		requestPath := r.URL.Path //current request path
 
-		if utils.InArray(requestPath,notAuth) || true {
+		if utils.InArray(requestPath,notAuth)  {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -36,7 +36,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 
 		tokenData := Token{}
 
-		token, err := jwt.ParseWithClaims(tokenPart, tokenData, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(tokenPart, &tokenData, func(token *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("token_password")), nil
 		})
 
@@ -45,8 +45,9 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 			return
 		}
 
+		contextKey := "userId"
 		//Everything went well, proceed with the request and set the caller to the user retrieved from the parsed token
-		ctx := context.WithValue(r.Context(), "userId", tokenData.UserId)
+		ctx := context.WithValue(r.Context(), contextKey, tokenData.UserId)
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r) //proceed in the middleware chain!
 	})
