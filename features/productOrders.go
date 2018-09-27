@@ -15,7 +15,6 @@ type ProductRequestInfo struct{
 
 type ProductRequest struct {
 	gorm.Model
-	ProductQuantity uint `json:"productQuantity"`
 	ProductId uint `json:"product"`
 	UserId uint `json:"userId"`
 }
@@ -99,7 +98,6 @@ func CreateProductRequests(w http.ResponseWriter, r *http.Request) {
 		productRequest := ProductRequest{}
 		productRequest.UserId = r.Context().Value("userId"). (uint)
 		productRequest.ProductId = element.ProductId
-		productRequest.ProductQuantity = element.ProductQuantity
 
 		err = GetDB().Create(&productRequest).Error
 		if err!=nil{

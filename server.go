@@ -9,6 +9,17 @@ import (
 	. "rest-api/features"
 )
 
+
+var corsHandler = func(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		enableCors(&w)
+	})
+}
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
 func Routes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(
@@ -19,6 +30,7 @@ func Routes() *chi.Mux {
 		middleware.Recoverer,                          // Recover from panics without crashing server
 	)
 
+	router.Use(corsHandler)
 	router.Use(JwtAuthentication) //attach JWT users middleware
 
 	router.Route("/api", func(r chi.Router) {
