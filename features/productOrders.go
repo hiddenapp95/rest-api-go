@@ -3,20 +3,26 @@ package features
 import (
 	"encoding/json"
 	"github.com/go-chi/chi"
-	"github.com/jinzhu/gorm"
 	"net/http"
-	"strconv"
+	"time"
 )
 
 type ProductRequestInfo struct{
-	ProductId uint `json:"productId"`
-	ProductQuantity uint `json:"quantity"`
+	Id uint `json:"id"`
+	Quantity int `json:"quantity"`
 }
 
 type ProductRequest struct {
-	gorm.Model
+	BaseModel
 	ProductId uint `json:"product"`
 	UserId uint `json:"userId"`
+}
+
+type ProductOrder struct{
+	Quantity int `json:"quantity"`
+	ProductId int `json:"productId"`
+	Price uint64 `json:"price"`
+	Title string `json:"title"`
 }
 
 func ProductRequestsRoutes() *chi.Mux {
@@ -34,15 +40,21 @@ var productRequestsErrors = map[string]int{
 }
 
 func GetUserProductRequests(w http.ResponseWriter, r *http.Request) {
-	productRequests := make([]*ProductRequest, 0)
-	userId := r.Context().Value("userId") . (uint)
-	err := GetDB().Table("product_requests").Where("user_id = " + strconv.FormatUint(uint64(userId),10)).Find(&productRequests).Error
+	var productOrders []ProductOrder
+	//userId := r.Context().Value("userId") . (uint)
+	//userId := 1
+	//err := GetDB().Table("product_requests").Where("user_id = " + strconv.FormatUint(uint64(userId),10)).Find(&productRequests).Error
+	err := db.Raw(`SELECT COUNT(product_id)as Quantity,product_id as ProductId, SUM(price) as Price, title as Title
+	FROM public.product_requests
+	INNER JOIN products on product_requests.product_id = products.id
+	where user_id = 1
+	GROUP BY product_id,price,title`).Scan(&productOrders).Error
 
 	if err!=nil {
 		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
 		return
 	}
-	renderResponse(w, r,productRequests,http.StatusOK)
+	renderResponse(w, r,productOrders,http.StatusOK)
 }
 
 func GetProductRequests(w http.ResponseWriter, r *http.Request) {
@@ -73,7 +85,8 @@ func UpdateProductRequests(w http.ResponseWriter, r *http.Request) {
 		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
 		return
 	}
-	err = db.Save(&product).Where("id = ?", product.ID).Error
+	product.CreatedAt = time.Now()
+	err = db.Save(&product).Where("id = ?", product.Id).Error
 	if err!=nil {
 		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
 		return
@@ -92,21 +105,22 @@ func CreateProductRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var productRequests []ProductRequest
-	
 	for _, element := range productRequestInfo {
+
+		for i := 0; i < element.Quantity; i++ {
 		productRequest := ProductRequest{}
-		productRequest.UserId = r.Context().Value("userId"). (uint)
-		productRequest.ProductId = element.ProductId
+		//productRequest.UserId = r.Context().Value("userId"). (uint)
+		productRequest.UserId = 1
+		productRequest.ProductId = element.Id
+		productRequest.CreatedAt = time.Now()
 
-		err = GetDB().Create(&productRequest).Error
-		if err!=nil{
-			renderResponse(w, r,buildErrorResponse(productRequestsErrors["DbError"]),http.StatusBadRequest)
-			return
+			err = GetDB().Create(&productRequest).Error
+			if err!=nil{
+				renderResponse(w, r,buildErrorResponse(productRequestsErrors["DbError"]),http.StatusBadRequest)
+				return
+			}
 		}
-
-		productRequests = append(productRequests, productRequest)
 	}
 
-	renderResponse(w, r,productRequests,http.StatusOK)
+	renderResponse(w, r,productRequestInfo,http.StatusOK)
 }

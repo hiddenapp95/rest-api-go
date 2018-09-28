@@ -3,16 +3,16 @@ package features
 import (
 	"encoding/json"
 	"github.com/go-chi/chi"
-	"github.com/jinzhu/gorm"
 	"net/http"
+	"time"
 )
 
 type Product struct {
-	gorm.Model
+	BaseModel
 	Title string `json:"title"`
 	Image string `json:"image"`
 	Description string `json:"description"`
-	Price string `json:"price"`
+	Price uint64 `json:"price"`
 	Enabled  bool `json:"enabled"`
 }
 
@@ -39,7 +39,7 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 	if property == "all"{
 		err = GetDB().Table("products").Find(&products).Error
 	}else{
-		err = GetDB().Table("products").Where(property+" ? = " +value).Find(&products).Error
+		err = GetDB().Table("products").Where(property+"  = " +value).Find(&products).Error
 	}
 
 	if err!=nil {
@@ -57,7 +57,9 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
 		return
 	}
-	err = db.Save(&product).Where("id = ?", product.ID).Error
+
+	product.UpdatedAt = time.Now()
+	err = db.Save(&product).Where("id = ?", product.Id).Error
 	if err!=nil {
 		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
 		return
@@ -75,7 +77,7 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 		renderResponse(w, r,buildErrorResponse(userErrors["InvalidParams"]),http.StatusBadRequest)
 		return
 	}
-
+	product.CreatedAt = time.Now()
 	err = GetDB().Create(product).Error
 	if err!=nil{
 		renderResponse(w, r,buildErrorResponse(userErrors["DbError"]),http.StatusBadRequest)

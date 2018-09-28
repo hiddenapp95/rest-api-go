@@ -19,7 +19,7 @@ func UserRoutes() *chi.Mux {
 }
 
 type User struct {
-	gorm.Model
+	BaseModel
 	Email string `json:"email" binding:"required"`
 	Password string `json:"password,omitempty" binding:"required"`
 	Role string `json:"role,omitempty"`
@@ -63,7 +63,7 @@ func Create(w http.ResponseWriter, r *http.Request)  {
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	user.Password = string(hashedPassword)
 	err = GetDB().Create(user).Error
-	if user.ID <= 0 || err!= nil {
+	if user.Id <= 0 || err!= nil {
 		renderResponse(w, r,buildErrorResponse(userErrors["DbError"]),http.StatusBadRequest)
 		return
 	}
@@ -103,7 +103,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	user.Password = ""
 
-	tk := &Token{UserId: user.ID,Email: user.Email, Role: user.Role}
+	tk := &Token{UserId: user.Id,Email: user.Email, Role: user.Role}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
 	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
 	tk.Token = tokenString
