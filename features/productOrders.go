@@ -7,30 +7,41 @@ import (
 	"time"
 )
 
-type ProductRequestInfo struct{
+type ProductOrderRequest struct {
+	CustomerName string `json:"customerName"`
+	Products []ProductToOrder `json:"products"`
+}
+
+type ProductToOrder struct{
 	Id uint `json:"id"`
 	Quantity int `json:"quantity"`
 }
 
-type ProductRequest struct {
+type ProductOrder struct {
 	BaseModel
 	ProductId uint `json:"product"`
-	UserId uint `json:"userId"`
+	CustomerName string `json:"customerName"`
 }
 
-type ProductOrder struct{
+type CustomerProductOrder struct{
 	Quantity int `json:"quantity"`
 	ProductId int `json:"productId"`
 	Price uint64 `json:"price"`
 	Title string `json:"title"`
+	CustomerName string `json:"customerName"`
+}
+
+type CustomerProductOrderResponse struct {
+	CustomerName string `json:"customerName"`
+	Products []CustomerProductOrder `json:"products"`
 }
 
 func ProductRequestsRoutes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Get("/{property}-{value}", GetProductRequests)
-	router.Get("/myRequests", GetUserProductRequests)
+	router.Get("/myRequests", GetProductOrders)
 	router.Post("/", CreateProductRequests)
-	router.Put("/",UpdateProductRequests)
+	router.Put("/",CreateProductRequests)
 	return router
 }
 
@@ -39,26 +50,33 @@ var productRequestsErrors = map[string]int{
 	"DbError": 2,
 }
 
-func GetUserProductRequests(w http.ResponseWriter, r *http.Request) {
-	var productOrders []ProductOrder
+func GetProductOrders(w http.ResponseWriter, r *http.Request) {
+	var productOrders []CustomerProductOrder
+
 	//userId := r.Context().Value("userId") . (uint)
 	//userId := 1
 	//err := GetDB().Table("product_requests").Where("user_id = " + strconv.FormatUint(uint64(userId),10)).Find(&productRequests).Error
-	err := db.Raw(`SELECT COUNT(product_id)as Quantity,product_id as ProductId, SUM(price) as Price, title as Title
-	FROM public.product_requests
-	INNER JOIN products on product_requests.product_id = products.id
-	where user_id = 1
-	GROUP BY product_id,price,title`).Scan(&productOrders).Error
+	err := db.Raw(`	SELECT customer_name,product_id,COUNT(product_id)as Quantity, price, title
+	FROM public.product_orders
+	INNER JOIN products on product_orders.product_id = products.id
+	GROUP BY customer_name,product_id,price,title`).Scan(&productOrders).Error
 
 	if err!=nil {
 		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
 		return
 	}
-	renderResponse(w, r,productOrders,http.StatusOK)
+
+	var response = map[string][]CustomerProductOrder{}
+
+	for _, element := range productOrders {
+		response[element.CustomerName] = append(response[element.CustomerName], element)
+	}
+
+	renderResponse(w, r,response,http.StatusOK)
 }
 
 func GetProductRequests(w http.ResponseWriter, r *http.Request) {
-	productRequests := make([]*ProductRequest, 0)
+	var productRequests []CustomerProductOrder
 	property := chi.URLParam(r,"property")
 	value := chi.URLParam(r,"value")
 
@@ -96,7 +114,7 @@ func UpdateProductRequests(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateProductRequests(w http.ResponseWriter, r *http.Request) {
-	var productRequestInfo []ProductRequestInfo
+	var productRequestInfo ProductOrderRequest
 
 	err := json.NewDecoder(r.Body).Decode(&productRequestInfo)//decode the request body into struct and failed if any error occur
 
@@ -105,22 +123,40 @@ func CreateProductRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, element := range productRequestInfo {
+	tx := db.Begin()
+
+	if tx.Error != nil {
+		renderResponse(w, r,buildErrorResponse(productRequestsErrors["InvalidParams"]),http.StatusBadRequest)
+		return
+	}
+
+	err = GetDB().Delete(ProductOrder{}, "customer_name = ?", productRequestInfo.CustomerName).Error
+
+	if err!=nil{
+		tx.Rollback()
+		renderResponse(w, r,buildErrorResponse(productRequestsErrors["InvalidParams"]),http.StatusBadRequest)
+		return
+	}
+
+	for _, element := range productRequestInfo.Products {
 
 		for i := 0; i < element.Quantity; i++ {
-		productRequest := ProductRequest{}
+		productRequest := ProductOrder{}
 		//productRequest.UserId = r.Context().Value("userId"). (uint)
-		productRequest.UserId = 1
+		//productRequest.UserId = 1
 		productRequest.ProductId = element.Id
+		productRequest.CustomerName = productRequestInfo.CustomerName
 		productRequest.CreatedAt = time.Now()
 
 			err = GetDB().Create(&productRequest).Error
 			if err!=nil{
+				tx.Rollback()
 				renderResponse(w, r,buildErrorResponse(productRequestsErrors["DbError"]),http.StatusBadRequest)
 				return
 			}
 		}
 	}
 
+	tx.Commit()
 	renderResponse(w, r,productRequestInfo,http.StatusOK)
 }
