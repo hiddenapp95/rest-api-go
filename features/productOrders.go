@@ -56,10 +56,10 @@ func GetProductOrders(w http.ResponseWriter, r *http.Request) {
 	//userId := r.Context().Value("userId") . (uint)
 	//userId := 1
 	//err := GetDB().Table("product_requests").Where("user_id = " + strconv.FormatUint(uint64(userId),10)).Find(&productRequests).Error
-	err := db.Raw(`	SELECT customer_name,product_id,COUNT(product_id)as Quantity, price, title
+	err := db.Raw(`	SELECT customer_name,product_id,COUNT(product_id)as Quantity, total_price, title
 	FROM public.product_orders
 	INNER JOIN products on product_orders.product_id = products.id
-	GROUP BY customer_name,product_id,price,title`).Scan(&productOrders).Error
+	GROUP BY customer_name,product_id,total_price,title`).Scan(&productOrders).Error
 
 	if err!=nil {
 		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
