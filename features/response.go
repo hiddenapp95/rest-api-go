@@ -5,8 +5,8 @@ import (
 	"net/http"
 )
 
-func buildErrorResponse (errorType int) (map[string]interface{}) {
-	return map[string]interface{} {"errorType" : errorType}
+func buildErrorResponse (errorType error) (map[string]interface{}) {
+	return map[string]interface{} {"error" : errorType.Error()}
 }
 
 func renderResponse (w http.ResponseWriter, r *http.Request,message interface{},status int) {

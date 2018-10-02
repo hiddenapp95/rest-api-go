@@ -20,7 +20,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 			"/api/users/login/"} //List of endpoints that doesn't require users
 		requestPath := r.URL.Path //current request path
 
-		if utils.InArray(requestPath,notAuth)  || true {
+		if utils.InArray(requestPath,notAuth){
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -28,7 +28,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 		tokenHeader := r.Header.Get("Authorization") //Grab the token from the header
 
 		if tokenHeader == "" || len(strings.Split(tokenHeader, " "))!=2 { //Token is missing, returns with error code 403 Unauthorized
-			renderResponse(w, r,buildErrorResponse(userErrors["InvalidToken"]),http.StatusForbidden)
+			renderResponse(w, r,buildErrorResponse(errorMap["TokenMissing"]),http.StatusForbidden)
 			return
 		}
 
@@ -41,7 +41,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 		})
 
 		if err != nil || !token.Valid { //Malformed token, returns with http code 403 as usual
-			renderResponse(w, r,buildErrorResponse(userErrors["InvalidToken"]),http.StatusForbidden)
+			renderResponse(w, r,buildErrorResponse(errorMap["InvalidToken"]),http.StatusForbidden)
 			return
 		}
 

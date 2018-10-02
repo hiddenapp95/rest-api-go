@@ -40,6 +40,7 @@ func init() {
 	db.Debug().AutoMigrate(&User{},&Product{},&ProductOrder{})
 }
 
+
 func GetDB() *gorm.DB {
 	return db
 }

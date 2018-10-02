@@ -13,10 +13,12 @@ import (
 var corsHandler = func(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
+		enableCors(&w)
+
 		if (*r).Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
 			return
 		}
-		enableCors(&w)
 
 		next.ServeHTTP(w, r) //proceed in the middleware chain!
 	})
@@ -45,7 +47,7 @@ func Routes() *chi.Mux {
 	router.Route("/api", func(r chi.Router) {
 		r.Mount("/products", ProductRoutes())
 		r.Mount("/users", UserRoutes())
-		r.Mount("/productRequest", ProductRequestsRoutes())
+		r.Mount("/productOrders", ProductRequestsRoutes())
 		r.Mount("/statistics", StatisticsRoutes())
 		r.Mount("/gc",GoogleCloudStorageRoutes())
 	})

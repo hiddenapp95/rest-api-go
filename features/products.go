@@ -19,32 +19,35 @@ type Product struct {
 
 func ProductRoutes() *chi.Mux {
 	router := chi.NewRouter()
-	router.Get("/{property}-{value}", GetProducts)
+	router.Get("/all", GetProducts)
+	router.Get("/enabled", GetAvailableProducts)
 	router.Post("/", CreateProduct)
 	router.Put("/",UpdateProduct)
 	return router
 }
 
-var productErrors = map[string]int{
-	"InvalidParams": 1,
-	"DbError": 2,
-}
-
-func GetProducts(w http.ResponseWriter, r *http.Request) {
-	products := make([]*Product, 0)
-	property := chi.URLParam(r,"property")
-	value := chi.URLParam(r,"value")
+func GetAvailableProducts(w http.ResponseWriter, r *http.Request) {
+	var products []Product
 
 	var err error
-
-	if property == "all"{
-		err = GetDB().Table("products").Find(&products).Error
-	}else{
-		err = GetDB().Table("products").Where(property+"  = " +value).Find(&products).Error
-	}
+	err = GetDB().Table("products").Where("enabled = " ,true).Find(&products).Error
 
 	if err!=nil {
-		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
+		renderResponse(w, r,buildErrorResponse(errorMap["DbError"]),http.StatusBadRequest)
+		return
+	}
+	renderResponse(w, r,products,http.StatusOK)
+}
+
+
+func GetProducts(w http.ResponseWriter, r *http.Request) {
+	var products []Product
+
+	var err error
+	err = GetDB().Table("products").Find(&products).Error
+
+	if err!=nil {
+		renderResponse(w, r,buildErrorResponse(errorMap["DbError"]),http.StatusBadRequest)
 		return
 	}
 	renderResponse(w, r,products,http.StatusOK)
@@ -55,14 +58,14 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(product) //decode the request body into struct and failed if any error occur
 	if err!=nil {
-		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
+		renderResponse(w, r,buildErrorResponse(errorMap["InvalidParams"]),http.StatusBadRequest)
 		return
 	}
 
 	product.UpdatedAt = time.Now()
 	err = db.Save(&product).Where("id = ?", product.Id).Error
 	if err!=nil {
-		renderResponse(w, r,buildErrorResponse(productErrors["DbError"]),http.StatusBadRequest)
+		renderResponse(w, r,buildErrorResponse(errorMap["DbError"]),http.StatusBadRequest)
 		return
 	}
 
@@ -75,13 +78,13 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(product) //decode the request body into struct and failed if any error occur
 
 	if err!=nil{
-		renderResponse(w, r,buildErrorResponse(userErrors["InvalidParams"]),http.StatusBadRequest)
+		renderResponse(w, r,buildErrorResponse(errorMap["InvalidParams"]),http.StatusBadRequest)
 		return
 	}
 	product.CreatedAt = time.Now()
 	err = GetDB().Create(product).Error
 	if err!=nil{
-		renderResponse(w, r,buildErrorResponse(userErrors["DbError"]),http.StatusBadRequest)
+		renderResponse(w, r,buildErrorResponse(errorMap["DbError"]),http.StatusBadRequest)
 		return
 	}
 

@@ -21,10 +21,6 @@ func GoogleCloudStorageRoutes() *chi.Mux {
 	return router
 }
 
-var cloudStorageErrors = map[string]int{
-	"InvalidParams": 1,
-	"DbError": 2,
-}
 func run (w http.ResponseWriter, req *http.Request){
 	b, err := ioutil.ReadFile("client_secret.json")
 	if err != nil {
