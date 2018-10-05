@@ -63,7 +63,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	product.UpdatedAt = time.Now()
-	err = db.Save(&product).Where("id = ?", product.Id).Error
+	err = db.Save(&product).Error
 	if err!=nil {
 		renderResponse(w, r,buildErrorResponse(errorMap["DbError"]),http.StatusBadRequest)
 		return

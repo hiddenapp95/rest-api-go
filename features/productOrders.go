@@ -72,7 +72,6 @@ func GetProductOrders(w http.ResponseWriter, r *http.Request) {
 	renderResponse(w, r,response,http.StatusOK)
 }
 
-
 func GetProductOrderByName(w http.ResponseWriter, r *http.Request) {
 	var productOrders []CustomerProductOrder
 	name := chi.URLParam(r,"name")
