@@ -3,10 +3,10 @@ package main
 import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/render"
 	"log"
 	"net/http"
 	. "rest-api/features"
+	"strings"
 )
 
 
@@ -34,7 +34,7 @@ func enableCors(w *http.ResponseWriter) {
 func Routes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(
-		render.SetContentType(render.ContentTypeJSON), // Set content-Type headers as application/json
+		//render.SetContentType(render.ContentTypeJSON), // Set content-Type headers as application/json
 		middleware.Logger,                             // Log API request calls
 		middleware.DefaultCompress,                    // Compress results, mostly gzipping assets and json
 		middleware.RedirectSlashes,                    // Redirect slashes to no slash URL versions
@@ -43,6 +43,11 @@ func Routes() *chi.Mux {
 
 	router.Use(corsHandler)
 	router.Use(JwtAuthentication) //attach JWT users middleware
+
+/*
+	workDir, _ := os.Getwd()
+	filesDir := filepath.Join(workDir, "app")
+	FileServer(router, "/app", http.Dir(filesDir))*/
 
 	router.Route("/api", func(r chi.Router) {
 		r.Mount("/products", ProductRoutes())
@@ -55,7 +60,29 @@ func Routes() *chi.Mux {
 	return router
 }
 
+
 func main() {
 	router := Routes()
+
 	log.Fatal(http.ListenAndServe(":8081", router)) // Note, the port is usually gotten from the environment.
+}
+
+
+
+func FileServer(r chi.Router, path string, root http.FileSystem) {
+	if strings.ContainsAny(path, "{}*") {
+		panic("FileServer does not permit URL parameters.")
+	}
+
+	fs := http.StripPrefix(path, http.FileServer(root))
+
+	if path != "/" && path[len(path)-1] != '/' {
+		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
+		path += "/"
+	}
+	path += "*"
+
+	r.Get(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fs.ServeHTTP(w, r)
+	}))
 }

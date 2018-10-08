@@ -14,13 +14,11 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		notAuth := []string{
-			"/api/users/create",
-			"/api/users/create/",
 			"/api/users/login",
 			"/api/users/login/"} //List of endpoints that doesn't require users
 		requestPath := r.URL.Path //current request path
 
-		if utils.InArray(requestPath,notAuth){
+		if true || utils.InArray(requestPath,notAuth) || !strings.Contains(requestPath,"api"){
 			next.ServeHTTP(w, r)
 			return
 		}

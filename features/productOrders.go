@@ -71,7 +71,6 @@ func GetProductOrders(w http.ResponseWriter, r *http.Request) {
 
 	renderResponse(w, r,response,http.StatusOK)
 }
-
 func GetProductOrderByName(w http.ResponseWriter, r *http.Request) {
 	var productOrders []CustomerProductOrder
 	name := chi.URLParam(r,"name")
@@ -101,7 +100,7 @@ type CreateProductOrder struct{
 
 func CreateProductRequests(w http.ResponseWriter, r *http.Request) {
 	var createProductRequest CreateProductOrderRequest
-	userId := r.Context().Value("userId") . (uint)
+	//userId := r.Context().Value("userId") . (uint)
 
 	err := json.NewDecoder(r.Body).Decode(&createProductRequest)//decode the request body into struct and failed if any error occur
 
@@ -134,7 +133,7 @@ func CreateProductRequests(w http.ResponseWriter, r *http.Request) {
 			productRequest.ProductId = element.Id
 			productRequest.CustomerName = createProductRequest.CustomerName
 			productRequest.CreatedAt = now
-			productRequest.CreatedByUserId = userId
+			//productRequest.CreatedByUserId = userId
 
 			err = GetDB().Create(&productRequest).Error
 			if err!=nil{
