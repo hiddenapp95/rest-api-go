@@ -66,7 +66,13 @@ func Routes() *chi.Mux {
 func main() {
 	router := Routes()
 
-	log.Fatal(http.ListenAndServe(":8081", router)) // Note, the port is usually gotten from the environment.
+	port := os.Getenv("PORT")
+
+	if port==""{
+		port = "8081"
+	}
+
+	log.Fatal(http.ListenAndServe(":" + port, router)) // Note, the port is usually gotten from the environment.
 }
 
 
