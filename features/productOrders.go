@@ -32,7 +32,18 @@ func ProductRequestsRoutes() *chi.Mux {
 	router.Get("/", GetCustomers)
 	router.Post("/", CreateProductRequests)
 	router.Put("/",CreateProductRequests)
+	router.Delete("/",DeleteAllCustomers)
 	return router
+}
+func DeleteAllCustomers(w http.ResponseWriter, r *http.Request) {
+	err :=  GetDB().Delete(ProductOrder{}).Error
+
+	if err!=nil {
+		renderResponse(w, r,buildErrorResponse(errorMap["DbError"]),http.StatusBadRequest)
+		return
+	}
+
+	renderResponse(w, r,"OK",http.StatusOK)
 }
 
 func GetCustomers(w http.ResponseWriter, r *http.Request) {
@@ -100,7 +111,7 @@ type CreateProductOrder struct{
 
 func CreateProductRequests(w http.ResponseWriter, r *http.Request) {
 	var createProductRequest CreateProductOrderRequest
-	//userId := r.Context().Value("userId") . (uint)
+	userId := r.Context().Value("userId") . (uint)
 
 	err := json.NewDecoder(r.Body).Decode(&createProductRequest)//decode the request body into struct and failed if any error occur
 
@@ -133,7 +144,7 @@ func CreateProductRequests(w http.ResponseWriter, r *http.Request) {
 			productRequest.ProductId = element.Id
 			productRequest.CustomerName = createProductRequest.CustomerName
 			productRequest.CreatedAt = now
-			//productRequest.CreatedByUserId = userId
+			productRequest.CreatedByUserId = userId
 
 			err = GetDB().Create(&productRequest).Error
 			if err!=nil{

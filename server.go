@@ -5,6 +5,8 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	. "rest-api/features"
 	"strings"
 )
@@ -36,18 +38,14 @@ func Routes() *chi.Mux {
 	router.Use(
 		//render.SetContentType(render.ContentTypeJSON), // Set content-Type headers as application/json
 		middleware.Logger,                             // Log API request calls
-		middleware.DefaultCompress,                    // Compress results, mostly gzipping assets and json
-		middleware.RedirectSlashes,                    // Redirect slashes to no slash URL versions
-		middleware.Recoverer,                          // Recover from panics without crashing server
+		//middleware.DefaultCompress,                    // Compress results, mostly gzipping assets and json
+		//middleware.RedirectSlashes,                    // Redirect slashes to no slash URL versions
+		//middleware.Recoverer,                          // Recover from panics without crashing server
 	)
 
 	router.Use(corsHandler)
 	router.Use(JwtAuthentication) //attach JWT users middleware
 
-/*
-	workDir, _ := os.Getwd()
-	filesDir := filepath.Join(workDir, "app")
-	FileServer(router, "/app", http.Dir(filesDir))*/
 
 	router.Route("/api", func(r chi.Router) {
 		r.Mount("/products", ProductRoutes())
@@ -56,6 +54,10 @@ func Routes() *chi.Mux {
 		r.Mount("/statistics", StatisticsRoutes())
 		r.Mount("/gc",GoogleCloudStorageRoutes())
 	})
+
+	workDir, _ := os.Getwd()
+	filesDir := filepath.Join(workDir, "files")
+	FileServer(router, "/", http.Dir(filesDir))
 
 	return router
 }
@@ -83,6 +85,8 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 	path += "*"
 
 	r.Get(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		//w.Header().Set("Content-Type", "application/xml")
 		fs.ServeHTTP(w, r)
 	}))
 }

@@ -18,7 +18,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 			"/api/users/login/"} //List of endpoints that doesn't require users
 		requestPath := r.URL.Path //current request path
 
-		if true || utils.InArray(requestPath,notAuth) || !strings.Contains(requestPath,"api"){
+		if utils.InArray(requestPath,notAuth) || !strings.Contains(requestPath,"api"){
 			next.ServeHTTP(w, r)
 			return
 		}
