@@ -1,0 +1,282 @@
+[1mdiff --git a/.idea/workspace.xml b/.idea/workspace.xml[m
+[1mindex 47fb375..4b6deff 100644[m
+[1m--- a/.idea/workspace.xml[m
+[1m+++ b/.idea/workspace.xml[m
+[36m@@ -2,13 +2,8 @@[m
+ <project version="4">[m
+   <component name="ChangeListManager">[m
+     <list default="true" id="0af428d1-b8e5-4061-9305-97535a549b5c" name="Default Changelist" comment="">[m
+[31m-      <change afterPath="$PROJECT_DIR$/features/response.go" afterDir="false" />[m
+[31m-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />[m
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />[m
+[31m-      <change beforePath="$PROJECT_DIR$/features/todo.go" beforeDir="false" afterPath="$PROJECT_DIR$/features/todo.go" afterDir="false" />[m
+[31m-      <change beforePath="$PROJECT_DIR$/features/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/features/users.go" afterDir="false" />[m
+[31m-      <change beforePath="$PROJECT_DIR$/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/server.go" afterDir="false" />[m
+[31m-      <change beforePath="$PROJECT_DIR$/utils/response.go" beforeDir="false" />[m
+[32m+[m[32m      <change beforePath="$PROJECT_DIR$/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />[m
+     </list>[m
+     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />[m
+     <option name="SHOW_DIALOG" value="false" />[m
+[36m@@ -22,33 +17,53 @@[m
+         <counts>[m
+           <entry key="project.closed" value="1" />[m
+           <entry key="project.open.time.13" value="1" />[m
+[31m-          <entry key="project.open.time.25" value="1" />[m
+[32m+[m[32m          <entry key="project.open.time.21" value="1" />[m
+[32m+[m[32m          <entry key="project.open.time.25" value="2" />[m
+[32m+[m[32m          <entry key="project.open.time.27" value="1" />[m
+[32m+[m[32m          <entry key="project.open.time.43" value="1" />[m
+           <entry key="project.open.time.5" value="1" />[m
+[31m-          <entry key="project.opened" value="3" />[m
+[32m+[m[32m          <entry key="project.open.time.61" value="2" />[m
+[32m+[m[32m          <entry key="project.open.time.84" value="1" />[m
+[32m+[m[32m          <entry key="project.open.time.98" value="1" />[m
+[32m+[m[32m          <entry key="project.opened" value="11" />[m
+         </counts>[m
+       </usages-collector>[m
+       <usages-collector id="statistics.file.extensions.open">[m
+         <counts>[m
+[31m-          <entry key="env" value="3" />[m
+[31m-          <entry key="go" value="17" />[m
+[32m+[m[32m          <entry key="Procfile" value="1" />[m
+[32m+[m[32m          <entry key="env" value="4" />[m
+[32m+[m[32m          <entry key="go" value="93" />[m
+[32m+[m[32m          <entry key="json" value="1" />[m
+[32m+[m[32m          <entry key="s" value="2" />[m
+         </counts>[m
+       </usages-collector>[m
+       <usages-collector id="statistics.file.types.open">[m
+         <counts>[m
+[31m-          <entry key="Go" value="17" />[m
+[31m-          <entry key="PLAIN_TEXT" value="3" />[m
+[32m+[m[32m          <entry key=".env file" value="1" />[m
+[32m+[m[32m          <entry key="Go" value="93" />[m
+[32m+[m[32m          <entry key="JSON" value="1" />[m
+[32m+[m[32m          <entry key="PLAIN_TEXT" value="4" />[m
+[32m+[m[32m          <entry key="x86 Plan9 Assembly" value="2" />[m
+         </counts>[m
+       </usages-collector>[m
+       <usages-collector id="statistics.file.extensions.edit">[m
+         <counts>[m
+[32m+[m[32m          <entry key="Procfile" value="8" />[m
+           <entry key="env" value="23" />[m
+[31m-          <entry key="go" value="2622" />[m
+[32m+[m[32m          <entry key="go" value="7359" />[m
+         </counts>[m
+       </usages-collector>[m
+       <usages-collector id="statistics.file.types.edit">[m
+         <counts>[m
+[31m-          <entry key="Go" value="2622" />[m
+[31m-          <entry key="PLAIN_TEXT" value="23" />[m
+[32m+[m[32m          <entry key="Go" value="7359" />[m
+[32m+[m[32m          <entry key="PLAIN_TEXT" value="31" />[m
+[32m+[m[32m        </counts>[m
+[32m+[m[32m      </usages-collector>[m
+[32m+[m[32m      <usages-collector id="statistics.go.postfix.template.usages.trigger">[m
+[32m+[m[32m        <counts>[m
+[32m+[m[32m          <entry key=".append" value="1" />[m
+[32m+[m[32m          <entry key=".len" value="1" />[m
+[32m+[m[32m          <entry key=".nil" value="1" />[m
+         </counts>[m
+       </usages-collector>[m
+     </session>[m
+[36m@@ -56,94 +71,97 @@[m
+   <component name="FileEditorManager">[m
+     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">[m
+       <file pinned="false" current-in-tab="false">[m
+[31m-        <entry file="file://$PROJECT_DIR$/server.go">[m
+[32m+[m[32m        <entry file="file://$PROJECT_DIR$/features/productOrders.go">[m
+           <provider selected="true" editor-type-id="text-editor">[m
+[31m-            <state relative-caret-position="289">[m
+[31m-              <caret line="24" column="26" selection-start-line="24" selection-start-column="26" selection-end-line="24" selection-end-column="26" />[m
+[32m+[m[32m            <state relative-caret-position="141">[m
+[32m+[m[32m              <caret line="36" column="1" selection-start-line="36" selection-start-column="1" selection-end-line="36" selection-end-column="1" />[m
+             </state>[m
+           </provider>[m
+         </entry>[m
+       </file>[m
+       <file pinned="false" current-in-tab="true">[m
+[31m-        <entry file="file://$PROJECT_DIR$/features/todo.go">[m
+[32m+[m[32m        <entry file="file://$PROJECT_DIR$/main.go">[m
+           <provider selected="true" editor-type-id="text-editor">[m
+[31m-            <state relative-caret-position="294">[m
+[31m-              <caret line="25" column="23" selection-start-line="25" selection-start-column="23" selection-end-line="25" selection-end-column="23" />[m
+[32m+[m[32m            <state relative-caret-position="952">[m
+[32m+[m[32m              <caret line="65" column="13" selection-start-line="65" selection-start-column="13" selection-end-line="65" selection-end-column="13" />[m
+             </state>[m
+           </provider>[m
+         </entry>[m
+       </file>[m
+       <file pinned="false" current-in-tab="false">[m
+[31m-        <entry file="file://$PROJECT_DIR$/features/response.go">[m
+[32m+[m[32m        <entry file="file://$PROJECT_DIR$/Procfile">[m
+           <provider selected="true" editor-type-id="text-editor">[m
+[31m-            <state relative-caret-position="170">[m
+[31m-              <caret line="13" column="31" selection-start-line="13" selection-start-column="31" selection-end-line="13" selection-end-column="31" />[m
+[32m+[m[32m            <state>[m
+[32m+[m[32m              <caret column="13" selection-start-column="13" selection-end-column="13" />[m
+             </state>[m
+           </provider>[m
+         </entry>[m
+       </file>[m
+       <file pinned="false" current-in-tab="false">[m
+[31m-        <entry file="file://$PROJECT_DIR$/features/users.go">[m
+[32m+[m[32m        <entry file="file://$PROJECT_DIR$/.env">[m
+           <provider selected="true" editor-type-id="text-editor">[m
+[31m-            <state relative-caret-position="328">[m
+[31m-              <caret line="52" selection-start-line="52" selection-end-line="53" selection-end-column="14" />[m
+[32m+[m[32m            <state relative-caret-position="34">[m
+[32m+[m[32m              <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />[m
+             </state>[m
+           </provider>[m
+         </entry>[m
+       </file>[m
+       <file pinned="false" current-in-tab="false">[m
+[31m-        <entry file="file://C:/Go/src/net/http/server.go">[m
+[32m+[m[32m        <entry file="file://$PROJECT_DIR$/features/db.go">[m
+           <provider selected="true" editor-type-id="text-editor">[m
+[31m-            <state relative-caret-position="438">[m
+[31m-              <caret line="1964" selection-start-line="1964" selection-end-line="1964" />[m
+[32m+[m[32m            <state relative-caret-position="391">[m
+[32m+[m[32m              <caret line="29" column="42" selection-start-line="29" selection-start-column="42" selection-end-line="29" selection-end-column="42" />[m
+             </state>[m
+           </provider>[m
+         </entry>[m
+       </file>[m
+       <file pinned="false" current-in-tab="false">[m
+[31m-        <entry file="file://$PROJECT_DIR$/../github.com/go-chi/chi/middleware/recoverer.go">[m
+[32m+[m[32m        <entry file="file://$PROJECT_DIR$/features/cloudStorage.go">[m
+           <provider selected="true" editor-type-id="text-editor">[m
+[31m-            <state relative-caret-position="510">[m
+[31m-              <caret line="35" selection-start-line="35" selection-end-line="35" />[m
+[32m+[m[32m            <state relative-caret-position="255">[m
+[32m+[m[32m              <caret line="28" selection-start-line="28" selection-end-line="28" />[m
+[32m+[m[32m              <folding>[m
+[32m+[m[32m                <element signature="e#18#231#0" expanded="true" />[m
+[32m+[m[32m              </folding>[m
+             </state>[m
+           </provider>[m
+         </entry>[m
+       </file>[m
+       <file pinned="false" current-in-tab="false">[m
+[31m-        <entry file="file://$PROJECT_DIR$/features/db.go">[m
+[32m+[m[32m        <entry file="file://C:/Go/src/net/http/server.go">[m
+           <provider selected="true" editor-type-id="text-editor">[m
+[31m-            <state relative-caret-position="527">[m
+[31m-              <caret line="37" column="5" selection-start-line="37" selection-start-column="5" selection-end-line="37" selection-end-column="5" />[m
+[31m-              <folding>[m
+[31m-                <element signature="e#18#141#0" expanded="true" />[m
+[31m-              </folding>[m
+[32m+[m[32m            <state relative-caret-position="32997">[m
+[32m+[m[32m              <caret line="1964" selection-start-line="1964" selection-end-line="1964" />[m
+             </state>[m
+           </provider>[m
+         </entry>[m
+       </file>[m
+       <file pinned="false" current-in-tab="false">[m
+[31m-        <entry file="file://$PROJECT_DIR$/.env">[m
+[32m+[m[32m        <entry file="file://$PROJECT_DIR$/../github.com/go-chi/chi/middleware/compress.go">[m
+           <provider selected="true" editor-type-id="text-editor">[m
+[31m-            <state relative-caret-position="34">[m
+[31m-              <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />[m
+[32m+[m[32m            <state relative-caret-position="2040">[m
+[32m+[m[32m              <caret line="131" selection-start-line="131" selection-end-line="131" />[m
+             </state>[m
+           </provider>[m
+         </entry>[m
+       </file>[m
+       <file pinned="false" current-in-tab="false">[m
+[31m-        <entry file="file://$PROJECT_DIR$/../github.com/go-chi/chi/mux.go">[m
+[32m+[m[32m        <entry file="file://$PROJECT_DIR$/features/jwt.go">[m
+           <provider selected="true" editor-type-id="text-editor">[m
+[31m-            <state relative-caret-position="7106">[m
+[31m-              <caret line="424" selection-start-line="424" selection-end-line="424" />[m
+[32m+[m[32m            <state relative-caret-position="253">[m
+[32m+[m[32m              <caret line="20" column="11" selection-start-line="20" selection-start-column="11" selection-end-line="20" selection-end-column="11" />[m
+[32m+[m[32m              <folding>[m
+[32m+[m[32m                <element signature="e#18#117#0" expanded="true" />[m
+[32m+[m[32m              </folding>[m
+             </state>[m
+           </provider>[m
+         </entry>[m
+       </file>[m
+       <file pinned="false" current-in-tab="false">[m
+[31m-        <entry file="file://$PROJECT_DIR$/utils/arrays.go">[m
+[32m+[m[32m        <entry file="file://$PROJECT_DIR$/features/users.go">[m
+           <provider selected="true" editor-type-id="text-editor">[m
+[31m-            <state relative-caret-position="68">[m
+[31m-              <caret line="4" selection-start-line="4" selection-end-line="4" />[m
+[32m+[m[32m            <state relative-caret-position="714">[m
+[32m+[m[32m              <caret line="49" selection-start-line="49" selection-end-line="49" />[m
+             </state>[m
+           </provider>[m
+         </entry>[m
+[36m@@ -164,7 +182,15 @@[m
+       <find>render</find>[m
+       <find>response</find>[m
+       <find>DB</find>[m
+[32m+[m[32m      <find>User</find>[m
+[32m+[m[32m      <find>wher</find>[m
+[32m+[m[32m      <find>context</find>[m
+[32m+[m[32m      <find>5</find>[m
+[32m+[m[32m      <find>fs</find>[m
+     </findStrings>[m
+[32m+[m[32m    <replaceStrings>[m
+[32m+[m[32m      <replace>Product</replace>[m
+[32m+[m[32m    </replaceStrings>[m
+   </component>[m
+   <component name="GOROOT" path="C:\Go" />[m
+   <component name="Git.Settings">[m
+[36m@@ -180,13 +206,24 @@[m
+         <option value="$PROJECT_DIR$/features/users/auth.go" />[m
+         <option value="$PROJECT_DIR$/features/base.go" />[m
+         <option value="$PROJECT_DIR$/features/users/users.go" />[m
+[31m-        <option value="$PROJECT_DIR$/features/db.go" />[m
+         <option value="$PROJECT_DIR$/.env" />[m
+         <option value="$PROJECT_DIR$/utils/response.go" />[m
+[32m+[m[32m        <option value="$PROJECT_DIR$/features/todo.go" />[m
+[32m+[m[32m        <option value="$PROJECT_DIR$/features/userRequests.go" />[m
+[32m+[m[32m        <option value="$PROJECT_DIR$/features/files.go" />[m
+[32m+[m[32m        <option value="$PROJECT_DIR$/features/productRequests.go" />[m
+[32m+[m[32m        <option value="$PROJECT_DIR$/features/baseModel.go" />[m
+         <option value="$PROJECT_DIR$/features/response.go" />[m
+[31m-        <option value="$PROJECT_DIR$/server.go" />[m
+[32m+[m[32m        <option value="$PROJECT_DIR$/features/cloudStorage.go" />[m
+[32m+[m[32m        <option value="$PROJECT_DIR$/features/errors.go" />[m
+         <option value="$PROJECT_DIR$/features/users.go" />[m
+[31m-        <option value="$PROJECT_DIR$/features/todo.go" />[m
+[32m+[m[32m        <option value="$PROJECT_DIR$/features/statistics.go" />[m
+[32m+[m[32m        <option value="$PROJECT_DIR$/features/products.go" />[m
+[32m+[m[32m        <option value="$PROJECT_DIR$/features/db.go" />[m
+[32m+[m[32m        <option value="$PROJECT_DIR$/features/productOrders.go" />[m
+[32m+[m[32m        <option value="$PROJECT_DIR$/features/jwt.go" />[m
+[32m+[m[32m        <option value="$PROJECT_DIR$/server.go" />[m
+[32m+[m[32m        <option value="$PROJECT_DIR$/Procfile" />[m
+       </list>[m
+     </option>[m
+   </component>[m
+[36m@@ -197,9 +234,9 @@[m
+     <sorting>DEFINITION_ORDER</sorting>[m
+   </component>[m
+   <component name="ProjectFrameBounds" extendedState="6">[m
+[31m-    <option name="x" value="295" />[m
+[31m-    <option name="y" value="-8" />[m
+[31m-    <option name="width" value="933" />[m
+[32m+[m[32m    <option name="x" value="-1126" />[m
+[32m+[m[32m    <option name="y" value="167" />[m
+[32m+[m[32m    <option name="width" value="1151" />[m
+     <option name="height" value="984" />[m
+   </component>[m
+   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />[m
+[36m@@ -215,11 +252,6 @@[m
+               <item name="rest-api" type="b2602c69:ProjectViewProjectNode" />[m
+               <item name="rest-api" type="462c0819:PsiDirectoryNode" />[m
+             </path>[m
+[31m-            <path>[m
+[31m-              <item name="rest-api" type="b2602c69:ProjectViewProjectNode" />[m
+[31m-              <item name="rest-api" type="462c0819:PsiDirectoryNode" />[m
+[31m-              <item name="features" type="462c0819:PsiDirectoryNode" />[m
+[31m-            </path>[m
+           </expand>[m
+           <select />[m
+    
