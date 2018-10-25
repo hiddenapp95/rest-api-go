@@ -22,6 +22,12 @@ type CustomerProductOrder struct{
 	CustomerName string `json:"customerName"`
 }
 
+type ProductSummary struct{
+	Title string `json:"title"`
+	Quantity int `json:"quantity"`
+	CustomerName string `json:"customerName"`
+}
+
 type CustomerName struct{
 	CustomerName string `json:"customerName"`
 }
@@ -33,6 +39,7 @@ func ProductRequestsRoutes() *chi.Mux {
 	router.Post("/", CreateProductRequests)
 	router.Put("/",CreateProductRequests)
 	router.Delete("/",DeleteAllCustomers)
+	router.Get("/productsSummary",GetProductsSummary)
 	return router
 }
 func DeleteAllCustomers(w http.ResponseWriter, r *http.Request) {
@@ -44,6 +51,24 @@ func DeleteAllCustomers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	renderResponse(w, r,"OK",http.StatusOK)
+}
+
+
+
+func GetProductsSummary(w http.ResponseWriter, r *http.Request) {
+	var productsSumary []ProductSummary
+
+	err := db.Raw(`SELECT title, COUNT(product_id) as Quantity, customer_name
+	FROM public.product_orders
+	INNER JOIN products on product_orders.product_id = products.id
+	GROUP BY title,customer_name`).Scan(&productsSumary).Error
+
+	if err!=nil {
+		renderResponse(w, r,buildErrorResponse(errorMap["DbError"]),http.StatusBadRequest)
+		return
+	}
+
+	renderResponse(w, r,productsSumary,http.StatusOK)
 }
 
 func GetCustomers(w http.ResponseWriter, r *http.Request) {

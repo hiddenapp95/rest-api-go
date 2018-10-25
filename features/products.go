@@ -14,6 +14,7 @@ type Product struct {
 	Description string `json:"description"`
 	TotalPrice uint64 `json:"totalPrice"`
 	ToBusiness uint64 `json:"toBusiness"`
+	Private bool `json:"private"`
 	Enabled  bool `json:"enabled"`
 }
 
